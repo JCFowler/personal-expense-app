@@ -104,17 +104,45 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _chartVisibilityTapped() {
+    print('Hi');
+    print(_showChart);
     setState(() {
       _showChart = !_showChart;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final appBar = Platform.isIOS
-        ? CupertinoNavigationBar(
+  List<Widget> _buildLandscape(MediaQueryData mediaQuery,
+      PreferredSizeWidget appBar, Widget transactionListWidget) {
+    return [
+      if(_showChart) Container(
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.7,
+        child: Chart(
+          _recentTransactions,
+        ),
+      ),
+      transactionListWidget,
+    ];
+  }
+
+  List<Widget> _buildProtrait(MediaQueryData mediaQuery,
+      PreferredSizeWidget appBar, Widget transactionListWidget) {
+    return [
+      Container(
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.3,
+        child: Chart(_recentTransactions),
+      ),
+      transactionListWidget
+    ];
+  }
+
+  PreferredSizeWidget _buildIOSAppBar(bool isLandscape) {
+    return CupertinoNavigationBar(
             middle: Text('Personal Expenses'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -137,8 +165,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 )
               ],
             ),
-          ) as PreferredSizeWidget
-        : AppBar(
+          );
+  }
+
+  PreferredSizeWidget _buildAndroidAppBar(bool isLandscape) {
+    return AppBar(
             title: Text('Personal Expenses'),
             actions: [
               if (isLandscape)
@@ -160,6 +191,15 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final appBar = Platform.isIOS
+        ? _buildIOSAppBar(isLandscape)
+        : _buildAndroidAppBar(isLandscape);
     final transactionListWidget = Center(
       child: Container(
         height: (mediaQuery.size.height -
@@ -174,26 +214,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             if (!isLandscape)
-              Container(
-                height: (mediaQuery.size.height -
-                        appBar.preferredSize.height -
-                        mediaQuery.padding.top) *
-                    0.3,
-                child: Chart(_recentTransactions),
-              ),
-            if (!isLandscape) transactionListWidget,
+              ..._buildProtrait(mediaQuery, appBar, transactionListWidget),
             if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(
-                        _recentTransactions,
-                      ),
-                    )
-                  : transactionListWidget
+              ..._buildLandscape(mediaQuery, appBar, transactionListWidget),
           ],
         ),
       ),

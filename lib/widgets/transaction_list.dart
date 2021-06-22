@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../models/transaction.dart';
+import 'transaction_item.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactionList;
@@ -31,42 +31,7 @@ class TransactionList extends StatelessWidget {
           })
         : ListView.builder(
             itemBuilder: (ctx, index) {
-              return Card(
-                elevation: 5,
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    child: Padding(
-                      padding: EdgeInsets.all(6),
-                      child: FittedBox(
-                        child: Text(
-                          '¥${transactionList[index].amount}',
-                        ),
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    transactionList[index].title,
-                  ),
-                  subtitle: Text(
-                    DateFormat.yMMMd().format(transactionList[index].date),
-                  ),
-                  trailing: MediaQuery.of(context).size.width > 360
-                      ? TextButton.icon(
-                          onPressed: () =>
-                              deleteTransaction(transactionList[index].id),
-                          icon: Icon(Icons.delete),
-                          label: Text('Delete'),
-                        )
-                      : IconButton(
-                          color: Theme.of(context).errorColor,
-                          onPressed: () =>
-                              deleteTransaction(transactionList[index].id),
-                          icon: Icon(Icons.delete),
-                        ),
-                ),
-              );
+              return TransactionItem(transactionList[index], deleteTransaction);
             },
             itemCount: transactionList.length,
           );
